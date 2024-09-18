@@ -4,21 +4,27 @@
 (in-package #:cl-user)
 
 (defpackage
-  #:com.djhaskin.clos-speed/structs-etypecase (:use #:cl)
+  #:com.djhaskin.clos-speed/classes-etypecase (:use #:cl)
   (:documentation
-    "Speed test using defstruct.")
+    "Speed test using defclass.")
   (:export
     prepare
     speedtest))
 
-(in-package #:com.djhaskin.clos-speed/structs-etypecase)
+(in-package #:com.djhaskin.clos-speed/classes-etypecase)
+(defclass op ()
+  ((a
+     :initarg :a
+     :accessor a)
+   (b
+     :initarg :b
+     :accessor b)))
 
-(defstruct (op (:conc-name))
-  a b)
+(defclass minus (op)
+  ())
 
-(defstruct (minus (:include op)))
-
-(defstruct (plus (:include op)))
+(defclass plus (op)
+  ())
 
 (defun evaluate (thing)
   (etypecase thing
@@ -37,12 +43,17 @@
 (defun generate (depth)
   (if (zerop depth)
       (random 10000)
-      (let ((a-clause (generate (1- depth)))
-            (b-clause (generate (1- depth))))
+      (make-instance
         (case
             (random 2)
-          (0 (make-minus :a a-clause :b b-clause))
-          (1 (make-plus :a a-clause :b b-clause))))))
+          (0
+           'minus)
+          (1
+           'plus))
+        :a
+        (generate (1- depth))
+        :b
+        (generate (1- depth)))))
 
 (defun prepare ()
   (loop for i from 1 to 64
@@ -54,4 +65,3 @@
 
 (time (let ((thing (prepare)))
   (speed-test thing)))
-

@@ -67,3 +67,6 @@
 (defun speed-test (thing)
   (loop for x in thing
         collect (evaluate x)))
+
+(time (let ((thing (prepare)))
+  (speed-test thing)))
