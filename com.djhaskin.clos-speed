@@ -1,0 +1,33 @@
+(defsystem "com.djhaskin.clos-speed"
+  :version "0.1.0"
+  :author "Daniel Jay Haskin"
+  :license "MIT"
+  :depends-on (
+               "alexandria"
+               "trivial-features"
+               )
+  :components ((:module "src"
+          :components
+          ((:file "clos-speed"))))
+
+  :description "CLOS speed test harness"
+  :in-order-to (
+                (test-op (test-op "com.djhaskin.clos-speed/tests"))))
+
+(defsystem "com.djhaskin.clos-speed/tests"
+  :version "0.5.0"
+  :author "Daniel Jay Haskin"
+  :license "MIT"
+  :depends-on ("com.djhaskin.clos-speed"
+               "parachute")
+
+  :components ((:module "test"
+                :components
+                ((:file "tests")
+                )))
+  :description "Test system for CLOS speed tests"
+  :perform (asdf:test-op (op c)
+
+                         (uiop:symbol-call
+                           :parachute
+                           :test :com.djhaskin.plines/tests)))
