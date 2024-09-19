@@ -8,8 +8,9 @@
   (:documentation
     "Speed test using defstruct.")
   (:export
+    prime
     prepare
-    speedtest))
+    speed-test))
 
 (in-package #:com.djhaskin.clos-speed/structs-etypecase)
 
@@ -44,6 +45,9 @@
           (0 (make-minus :a a-clause :b b-clause))
           (1 (make-plus :a a-clause :b b-clause))))))
 
+(defun prime ()
+  (evaluate (generate 3)))
+
 (defun prepare ()
   (loop for i from 1 to 64
         collect (generate 16)))
@@ -51,7 +55,3 @@
 (defun speed-test (thing)
   (loop for x in thing
         collect (evaluate x)))
-
-(time (let ((thing (prepare)))
-  (speed-test thing)))
-

@@ -1,0 +1,50 @@
+#!/bin/sh
+#|-*- mode:lisp -*-|#
+#|
+exec ros -Q -- $0 "$@"
+|#
+(progn ;;init forms
+  (ros:ensure-asdf)
+  #+quicklisp(ql:quickload '() :silent t)
+  (asdf:load-system "com.djhaskin.clos-speed")
+  (asdf:load-system "uiop")
+  )
+
+(defpackage :ros.script.clos-speed.3935745124
+  (:use :cl))
+(in-package :ros.script.clos-speed.3935745124)
+
+(defun cli-switch (arg)
+  (case (first argv)
+    ("classes"
+      (values #'com.djhaskin.clos-speed/classes:prime
+              #'com.djhaskin.clos-speed/classes:prepare
+              #'com.djhaskin.clos-speed/classes:speed-test))
+    ("structs"
+      (values #'com.djhaskin.clos-speed/structs:prime
+              #'com.djhaskin.clos-speed/structs:prepare
+              #'com.djhaskin.clos-speed/structs:speed-test))
+    ("structs-etypecase"
+      (values #'com.djhaskin.clos-speed/structs-etypecase:prime
+              #'com.djhaskin.clos-speed/structs-etypecase:prepare
+              #'com.djhaskin.clos-speed/structs-etypecase:speed-test))))
+
+(defun main (&rest argv)
+  (declare (ignorable argv))
+  (if (null argv)
+    (format t "Need two argument: {classes|structs|structs-etypecase} {dispatch|consing}~%")
+    (multiple-value-bind (prime prepare speed-test)
+      (cli-switch (first argv))
+      (format t "Started speed test, pre-compiled, on ~A, version ~A~%"
+              (lisp-implementation-type)
+              (lisp-implementation-version))
+      (funcall prime)
+      (case (second argv)
+        (nil (format t "Need two argument: {classes|structs|structs-etypecase} {dispatch|consing}~%"))
+        ("dispatch" (let ((thing (funcall prepare)))
+                      (time (funcall speed-test thing))))
+        ("consing" (time (let ((thing (funcall prepare)))
+                           (funcall speed-test thing))))))))
+
+
+;;; vim: set ft=lisp lisp:
